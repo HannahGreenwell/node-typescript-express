@@ -6,6 +6,8 @@ import express, { Request, Response } from "express";
 import * as ItemsService from "./items.service";
 import { BaseItem, Item } from "./item.interface";
 import { checkJwt } from "../middleware/authz.middleware";
+import { checkPermissions } from "../middleware/permissions.middleware";
+import { ItemPermissions } from "./item-permissions";
 
 /**
  * Router Definition
@@ -48,39 +50,51 @@ itemsRouter.get("/:id", async (req: Request, res: Response) => {
 itemsRouter.use(checkJwt);
 
 // POST items
-itemsRouter.post("/", async (req: Request, res: Response) => {
-  try {
-    const item: BaseItem = req.body;
-    const newItem = await ItemsService.create(item);
-    res.status(201).json(newItem);
-  } catch (error) {
-    res.status(500).send((error as Error)?.message);
+itemsRouter.post(
+  "/",
+  checkPermissions(ItemPermissions.CreateItems),
+  async (req: Request, res: Response) => {
+    try {
+      const item: BaseItem = req.body;
+      const newItem = await ItemsService.create(item);
+      res.status(201).json(newItem);
+    } catch (error) {
+      res.status(500).send((error as Error)?.message);
+    }
   }
-});
+);
 
 // PUT items/:id
-itemsRouter.put("/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
-  const item: BaseItem = req.body;
-  try {
-    const updatedItem = await ItemsService.update(id, item);
-    if (updatedItem) {
-      return res.status(200).send(updatedItem);
+itemsRouter.put(
+  "/:id",
+  checkPermissions(ItemPermissions.UpdateItems),
+  async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    const item: BaseItem = req.body;
+    try {
+      const updatedItem = await ItemsService.update(id, item);
+      if (updatedItem) {
+        return res.status(200).send(updatedItem);
+      }
+      const newItem = await ItemsService.create(item);
+      res.status(201).json(newItem);
+    } catch (error) {
+      res.status(500).send((error as Error)?.message);
     }
-    const newItem = await ItemsService.create(item);
-    res.status(201).json(newItem);
-  } catch (error) {
-    res.status(500).send((error as Error)?.message);
   }
-});
+);
 
 // DELETE items/:id
-itemsRouter.delete("/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
-  try {
-    await ItemsService.remove(id);
-    res.sendStatus(204);
-  } catch (error) {
-    res.status(500).send((error as Error)?.message);
+itemsRouter.delete(
+  "/:id",
+  checkPermissions(ItemPermissions.DeleteItems),
+  async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    try {
+      await ItemsService.remove(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).send((error as Error)?.message);
+    }
   }
-});
+);

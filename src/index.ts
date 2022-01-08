@@ -8,7 +8,7 @@ import cors from "cors";
 import helmet from "helmet";
 import { itemsRouter } from "./items/items.router";
 import { errorHandler } from "./middleware/error.middleware";
-import { notFoundHandler } from "./middleware/notFound.middleware";
+import { notFoundHandler } from "./middleware/not-found.middleware";
 
 /**
  * App Variables
