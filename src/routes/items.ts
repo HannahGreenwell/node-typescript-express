@@ -3,11 +3,11 @@
  */
 
 import express, { Request, Response } from "express";
-import * as ItemsService from "./items.service";
-import { BaseItem, Item } from "./item.interface";
-import { checkJwt } from "../middleware/authz.middleware";
-import { checkPermissions } from "../middleware/permissions.middleware";
-import { ItemPermissions } from "./item-permissions";
+import * as ItemsService from "../services/items";
+import { BaseItem, Item } from "../models/item";
+import { checkJwt } from "../middleware/auth";
+import { checkPermissions } from "../middleware/permissions";
+import { ItemPermissions } from "../models/item";
 
 /**
  * Router Definition
@@ -34,6 +34,7 @@ itemsRouter.get("/", async (req: Request, res: Response) => {
 // GET items/:id
 itemsRouter.get("/:id", async (req: Request, res: Response) => {
   const id: number = parseInt(req.params.id, 10);
+  console.log("req.body.id", req.body.id);
   try {
     const item: Item = await ItemsService.find(id);
     if (item) {

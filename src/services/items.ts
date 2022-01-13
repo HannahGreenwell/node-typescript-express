@@ -2,8 +2,7 @@
  * Data Model Interfaces
  */
 
-import { BaseItem, Item } from "./item.interface";
-import { Items } from "./items.interface";
+import { BaseItem, Item, Items } from "../models/item";
 
 /**
  * In-Memory Store

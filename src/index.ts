@@ -6,9 +6,9 @@ import * as dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 // import helmet from "helmet";
-import { router } from "./routes/index.routes";
-import { errorHandler } from "./middleware/error.middleware";
-import { notFoundHandler } from "./middleware/not-found.middleware";
+import { errorHandler } from "./middleware/error";
+import { notFoundHandler } from "./middleware/notFound";
+import { router } from "./routes";
 
 /**
  * App Variables
@@ -32,7 +32,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/", router);
+app.use("/api", router);
 
 app.use(errorHandler);
 app.use(notFoundHandler);
