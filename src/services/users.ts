@@ -8,7 +8,7 @@ class UsersService implements Crud {
   }
 
   async list(limit: number, page: number) {
-    return UsersDao.getUsers();
+    return UsersDao.getUsers(limit, page);
   }
 
   async readById(id: string) {
@@ -20,15 +20,15 @@ class UsersService implements Crud {
   }
 
   async putById(id: string, resource: PutUserDto) {
-    return UsersDao.putUser(id, resource);
+    return UsersDao.updateUserById(id, resource);
   }
 
   async patchById(id: string, resource: PatchUserDto) {
-    return UsersDao.patchUser(id, resource);
+    return UsersDao.updateUserById(id, resource);
   }
 
   async deleteById(id: string) {
-    return UsersDao.removeUser(id);
+    return UsersDao.deleteUserById(id);
   }
 }
 

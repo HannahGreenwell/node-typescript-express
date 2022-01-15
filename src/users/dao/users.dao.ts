@@ -1,56 +1,66 @@
 import shortid from "shortid";
 import { CreateUserDto, PutUserDto, PatchUserDto } from "../../models/user";
+import MongooseService from "../../services/mongoose";
 
 class UsersDao {
-  users: Array<CreateUserDto> = [
+  Schema = MongooseService.getMongoose().Schema;
+
+  userSchema = new this.Schema(
     {
-      id: "123ABC",
-      email: "test@test.com",
-      password: "password",
-      firstName: "Test",
-      lastName: "Test",
+      _id: String,
+      email: String,
+      password: { type: String, select: false },
+      firstName: String,
+      lastName: String,
+      permissionFlags: Number,
     },
-  ];
+    { id: false }
+  );
+
+  User = MongooseService.getMongoose().model("User", this.userSchema);
 
   constructor() {
     console.log("Created new instance of UsersDao");
   }
 
-  async addUser(user: CreateUserDto) {
-    user.id = shortid.generate();
-    this.users.push(user);
-    return user.id;
-  }
-
-  async getUsers() {
-    return this.users;
-  }
-
-  async getUserById(userId: string) {
-    return this.users.find((user) => user.id === userId);
+  async addUser(userFields: CreateUserDto) {
+    const userId = shortid.generate();
+    const user = new this.User({
+      _id: userId,
+      ...userFields,
+      permissionFlags: 1,
+    });
+    await user.save();
+    return userId;
   }
 
   async getUserByEmail(email: string) {
-    return this.users.find((user) => user.email === email);
+    return this.User.findOne({ email: email }).exec();
   }
 
-  async putUser(userId: string, user: PutUserDto) {
-    const userIndex = this.users.findIndex((user) => user.id === userId);
-    this.users.splice(userIndex, 1, user);
-    return `${user.id} updated via PUT`;
+  async getUserById(id: string) {
+    return this.User.findOne({ _id: id }).exec();
   }
 
-  async patchUser(userId: string, user: PatchUserDto) {
-    const userIndex = this.users.findIndex((user) => user.id === userId);
-    const userUpdate = { ...this.users[userIndex], ...user };
-    this.users.splice(userIndex, 1, userUpdate);
-    return `${user.id} updated via PATCH`;
+  async getUsers(limit = 25, page = 0) {
+    return this.User.find()
+      .limit(limit)
+      .skip(limit * page)
+      .exec();
   }
 
-  async removeUser(userId: string) {
-    const userIndex = this.users.findIndex((user) => user.id === userId);
-    this.users.splice(userIndex, 1);
-    return `${userId} removed`;
+  async updateUserById(id: string, userFields: PutUserDto | PatchUserDto) {
+    const user = await this.User.findOneAndUpdate(
+      { _id: id },
+      { $set: userFields },
+      { new: true }
+    ).exec();
+
+    return user;
+  }
+
+  async deleteUserById(id: string) {
+    return this.User.deleteOne({ _id: id }).exec();
   }
 }
 

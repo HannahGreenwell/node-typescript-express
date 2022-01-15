@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import UsersService from "../services/users";
 
 export const extractUserId = (
@@ -43,7 +43,7 @@ export const validateCorrectEmail = async (
   next: NextFunction
 ) => {
   const user = await UsersService.readByEmail(req.body.email);
-  if (user?.id === req.params.id) {
+  if (user?._id === req.params.id) {
     next();
   } else {
     res.status(400).send({ error: "Invalid email" });
